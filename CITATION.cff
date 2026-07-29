@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "evidence: run the whole portfolio over your repo — the weakest leg, never the mean"
+abstract: >-
+  run the whole portfolio over your repo — the weakest leg, never the mean
+authors:
+  - family-names: Harris
+    given-names: Nick
+repository-code: "https://github.com/nickharris808/evidence"
+url: "https://github.com/nickharris808/evidence"
+license: Apache-2.0
+type: software
+keywords:
+  - verification
+  - abstention
+  - reproducibility
