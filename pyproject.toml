@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 # somebody else's code. Renaming the distribution fixes that without a repo rename, an import
 # change, or a single broken link.
 name = "evidence-runner"
-version = "0.1.0"
+version = "0.1.1"
 description = "Run the verification portfolio over your repo and get ONE verdict — the weakest leg, never the mean"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -31,25 +31,33 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
-# The constituents. `evidence` works without them — each missing tool reports MISSING and does
-# not vote — but an audit is only as broad as the tools that actually ran.
+
+# WHY THERE IS NO `all` EXTRA.
 #
-# These were `name @ git+https://...` direct references, which PyPI forbids outright — the upload
-# is rejected with a 400. They were written that way because none of these tools were on PyPI yet;
-# now that they are, they become ordinary requirements.
+# `evidence` works without any constituent — each missing tool reports MISSING and does not vote —
+# but an audit is only as broad as the tools that actually ran, so an easy way to get all of them
+# is worth having. This was that way, and it did not work. It existed, it was published in 0.1.0, AND IT NEVER RESOLVED.
 #
-# The first line was the dangerous one. It said plain `gridlock`, and `gridlock` on PyPI is an
-# unrelated coupled-gridding library. `pip install "evidence[all]"` would have pulled a stranger's
-# package into the user's environment as a dependency of ours — the same hazard we had already
-# found in the README install lines, reproduced inside our own dependency list, where a reader
-# would never think to look for it.
-all = [
-  "gridlock-certify>=0.1.0",
-  "signoff-cert>=1.0.0",
-  "honestbench>=0.2.0",
-  "sf-verify>=0.1.0",
-  "proof-to-code-drift>=0.1.0",
-]
+# It listed the five constituents as ordinary requirements -- gridlock-certify, signoff-cert,
+# honestbench, sf-verify, proof-to-code-drift -- on the stated belief that they were on PyPI by
+# then. NONE OF THE FIVE IS ON PyPI. `pip install "evidence-runner[all]"` therefore stops with
+# `No matching distribution found for gridlock-certify`, and that command appeared three times in
+# the published README, including inside a copy-paste CI snippet.
+#
+# It cannot be repaired in place. The constituents were originally written as
+# `name @ git+https://...` direct references, and PyPI REJECTS AN UPLOAD CONTAINING ONE with a 400.
+# So there is no form of this extra that both resolves and is publishable until the five names
+# exist on PyPI. An extra that cannot resolve is worse than no extra: it fails at the reader's
+# install step, after they have already trusted the instruction.
+#
+# The README documents the constituents as explicit pinned git+ installs instead. When the five
+# names are published, `all` comes back as ordinary requirements -- and the check that it actually
+# resolves runs BEFORE that release, not after.
+#
+# The first line of the old extra was separately dangerous: it once said plain `gridlock`, and
+# `gridlock` on PyPI is an unrelated coupled-gridding library. That would have pulled a stranger's
+# package into the user's environment as a dependency of ours, where a reader would never think to
+# look for it.
 
 [project.scripts]
 evidence = "evidence.cli:main"

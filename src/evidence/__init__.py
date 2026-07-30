@@ -3,7 +3,7 @@
 The aggregate is the WEAKEST leg, never the mean. Four checks that passed and one that could not
 run is not "80% verified"; it is unverified, with four things known about it.
 """
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from .audit import audit, render                                    # noqa: E402
 from .constituents import NOT_AUTOMATABLE, REGISTRY, Constituent    # noqa: E402

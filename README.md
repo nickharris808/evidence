@@ -18,7 +18,24 @@ with four things known about it.
 
 ```bash
 pip install evidence-runner                 # the runner alone
-pip install "evidence-runner[all]"          # + every constituent it knows how to drive
+```
+
+> ⚠️ **`pip install "evidence-runner[all]"` DOES NOT WORK, and it is still in the copy on PyPI.**
+> That extra names five constituents — `gridlock-certify`, `signoff-cert`, `honestbench`,
+> `sf-verify`, `proof-to-code-drift` — and **none of the five is on PyPI**, so pip stops with
+> `No matching distribution found for gridlock-certify`. The runner itself installs fine; only the
+> extra fails. The extra is removed here and the fix reaches PyPI at the next release; version
+> 0.1.0, live now, still carries it.
+
+The constituents are installed from their repositories until those names are published:
+
+```bash
+pip install \
+  "gridlock-certify    @ git+https://github.com/nickharris808/gridlock@v0.1.0" \
+  "signoff-cert        @ git+https://github.com/nickharris808/signoff-cert@v1.0.1" \
+  "honestbench         @ git+https://github.com/nickharris808/honestbench@v0.2.0" \
+  "sf-verify           @ git+https://github.com/nickharris808/sf-verify@v0.1.0" \
+  "proof-to-code-drift @ git+https://github.com/nickharris808/proof-to-code-drift@v0.1.0"
 ```
 
 > **Install name vs import name.** The distribution is `evidence-runner`; the module you import is
@@ -73,11 +90,18 @@ $ evidence audit .
   AGGREGATE: FAILED — 1 fail, 4 n/a
   gridlock is FAILED, and the aggregate is the weakest leg — 0 other constituent(s) passing does not lift it
   The aggregate is the WEAKEST leg, never the mean.
+
+  This does NOT prove:
+    - that the constituents cover everything worth checking — an audit is exactly as broad as the tools that ran, and a PASSED aggregate over two legs is a narrow statement
+    - that a NOT_APPLICABLE leg found nothing wrong; it looked for nothing, which is different
+    - anything a constituent's own scope section disclaims — this aggregate inherits every limit of every leg it summarises, and adds no confidence of its own
 $ echo $?
 1
 ```
 
-Reproduce it exactly: `pip install "evidence-runner[all]"`, save the file above, run the command.
+Reproduce it exactly: install the runner and its constituents with the two commands under
+**Install** above, save the file above, run the command. (Not `evidence-runner[all]` — that
+extra does not resolve; see the warning there.)
 
 ## The verdict algebra
 
@@ -135,7 +159,17 @@ and why only part of it applies to a static tree.
 ## CI
 
 ```yaml
-- run: pip install "evidence-runner[all]"
+- run: pip install evidence-runner
+  # The constituents are not on PyPI yet, so they install from their repositories. Pinned to
+  # tags: a CI step that tracks a branch is not reproducible. Drop any line you do not want
+  # to run -- a missing tool reports MISSING and does not vote, it does not fail the audit.
+- run: |
+    pip install \
+      "gridlock-certify    @ git+https://github.com/nickharris808/gridlock@v0.1.0" \
+      "signoff-cert        @ git+https://github.com/nickharris808/signoff-cert@v1.0.1" \
+      "honestbench         @ git+https://github.com/nickharris808/honestbench@v0.2.0" \
+      "sf-verify           @ git+https://github.com/nickharris808/sf-verify@v0.1.0" \
+      "proof-to-code-drift @ git+https://github.com/nickharris808/proof-to-code-drift@v0.1.0"
 - run: evidence audit . --format sarif > evidence.sarif
   continue-on-error: true
 - uses: github/codeql-action/upload-sarif@v3
