@@ -25,6 +25,15 @@ jobs:
           # gridlock is installed so the end-to-end constituent tests actually RUN in CI.
           # Without it they skip, and a suite that silently skips its integration tests is a
           # suite that reports green about code it never executed.
-          pip install "gridlock @ git+https://github.com/nickharris808/gridlock"
+          #
+          # The DISTRIBUTION is `gridlock-certify`; the repository is `gridlock`. In a PEP 508
+          # direct reference the name before `@` must be the distribution name, not the repo
+          # name. Written as `gridlock @ git+...` pip rejects the built wheel as a name mismatch
+          # and falls back to PyPI, where `gridlock` is an UNRELATED third party's project
+          # (v0.3-2.2). That is what took this suite red on 2026-07-30 across 3.9/3.11/3.12:
+          #   ERROR: No matching distribution found for gridlock (unavailable)
+          # Verified 2026-08-13 in a clean venv: the bare form fails exactly as above, this
+          # form installs gridlock-certify 0.1.0.
+          pip install "gridlock-certify @ git+https://github.com/nickharris808/gridlock"
       - name: Test
         run: python -m pytest -q
